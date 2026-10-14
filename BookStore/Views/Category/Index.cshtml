@@ -1,0 +1,11 @@
+﻿@using BookStore.Models;
+@model List<Category>
+
+<h1>Categories</h1>
+
+<ul>
+    @foreach (var category in Model)
+    {
+        <li>@category.Name</li>
+    }
+</ul>

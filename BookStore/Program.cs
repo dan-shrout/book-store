@@ -1,9 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using BookStore.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+// This is the connection string for the database, which is stored in the appsettings.json file.
+// The connection string is used to connect to the database.
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings:SQLConnection").Value);
+});
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
