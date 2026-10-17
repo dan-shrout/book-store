@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BookStore.Migrations
+namespace BookStore.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20261015025958_AddMaxLengthToCategoryName")]
-    partial class AddMaxLengthToCategoryName
+    [Migration("20261014022132_AddDisplayOrderToTheCategoryModel")]
+    partial class AddDisplayOrderToTheCategoryModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,8 +37,7 @@ namespace BookStore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -48,31 +47,31 @@ namespace BookStore.Migrations
                         new
                         {
                             Id = 1,
-                            DisplayOrder = 1,
+                            DisplayOrder = 0,
                             Name = "Action"
                         },
                         new
                         {
                             Id = 2,
-                            DisplayOrder = 2,
+                            DisplayOrder = 0,
                             Name = "Comedy"
                         },
                         new
                         {
                             Id = 3,
-                            DisplayOrder = 3,
+                            DisplayOrder = 0,
                             Name = "Drama"
                         },
                         new
                         {
                             Id = 4,
-                            DisplayOrder = 4,
+                            DisplayOrder = 0,
                             Name = "Fantasy"
                         },
                         new
                         {
                             Id = 5,
-                            DisplayOrder = 5,
+                            DisplayOrder = 0,
                             Name = "Horror"
                         });
                 });

@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BookStore.Migrations
+namespace BookStore.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20261013203248_AddCategoryToDB")]
-    partial class AddCategoryToDB
+    [Migration("20261013210921_SeedCategoryTable")]
+    partial class SeedCategoryTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,33 @@ namespace BookStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Action"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Comedy"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Drama"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Fantasy"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Horror"
+                        });
                 });
 #pragma warning restore 612, 618
         }
