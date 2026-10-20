@@ -1,4 +1,4 @@
-﻿using BookStore.Data;
+﻿using BookStore.Business.Services.IServices;
 using BookStore.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,17 +6,17 @@ namespace BookStore.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly ApplicationDBContext _context;
-        public CategoryController(ApplicationDBContext context)
+        private readonly ICategoryService _categoryService;
+        public CategoryController(ICategoryService categoryService)
         {
-            _context = context;
+            _categoryService = categoryService;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var categories = _context.Categories.ToList();
-            return View("Index", categories);
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            return View(categories);
         }
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             return View();
         }
@@ -24,30 +24,29 @@ namespace BookStore.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Create")]
-        public IActionResult CreatePOST(Category category)
+        public async Task<IActionResult> CreatePOST(Category category)
         {
-            if (!String.IsNullOrEmpty(category.Name) && _context.Categories.Any(c => c.Name.ToLower() == category.Name.ToLower()))
+            if (!String.IsNullOrEmpty(category.Name) && !await _categoryService.IsCategoryNameUniqueAsync(category.Name))
             {
                 ModelState.AddModelError("", "That category name already exists");
             }
             if (ModelState.IsValid)
             {
-                _context.Categories.Add(category);
-                _context.SaveChanges();
+                await _categoryService.CreateCategoryAsync(category);
                 TempData["success"] = "Category was created successfully";
                 return RedirectToAction("Index");
             }
             return View();
         }
 
-        public IActionResult Update(int? id)
+        public async Task<IActionResult> Update(int? id)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
 
-            var category = _context.Categories.Find(id);
+            var category = await _categoryService.GetCategoryByIdAsync(id.Value);
             if (category == null)
             {
                 return NotFound();
@@ -58,31 +57,30 @@ namespace BookStore.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Update")]
-        public IActionResult UpdatePOST(Category category)
+        public async Task<IActionResult> UpdatePOST(Category category)
         {
             if (!String.IsNullOrEmpty(category.Name) &&
-                _context.Categories.Any(c => c.Name.ToLower() == category.Name.ToLower() && c.Id != category.Id))
+                !await _categoryService.IsCategoryNameUniqueAsync(category.Name, category.Id))
             {
-                ModelState.AddModelError("", "That category name already exists");
+                ModelState.AddModelError("", "Category \"{category.Name}\" already exists");
             }
             if (ModelState.IsValid)
             {
-                _context.Categories.Update(category);
-                _context.SaveChanges();
+                await _categoryService.UpdateCategoryAsync(category);
                 TempData["success"] = $"Category \"{category.Name}\" was updated successfully";
                 return RedirectToAction("Index");
             }
             return View();
         }
         // Delete
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
 
-            var category = _context.Categories.Find(id);
+            var category = await _categoryService.GetCategoryByIdAsync(id.Value);
             if (category == null)
             {
                 return NotFound();
@@ -93,15 +91,9 @@ namespace BookStore.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Delete")]
-        public IActionResult DeletePOST(int id)
+        public async Task<IActionResult> DeletePOST(int id)
         {
-            var category = _context.Categories.Find(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-            _context.Categories.Remove(category);
-            _context.SaveChanges();
+            await _categoryService.DeleteCategoryAsync(id);
             TempData["success"] = "Category was deleted successfully";
             return RedirectToAction("Index");
 
