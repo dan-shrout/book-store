@@ -1,10 +1,11 @@
 ﻿using BookStore.Business.Services.IServices;
 using BookStore.Data;
 using BookStore.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookStore.Business.Services
 {
-    internal class CategoryService : ICategoryService
+    public class CategoryService : ICategoryService
     {
         private readonly ApplicationDBContext _context;
         public CategoryService(ApplicationDBContext context)
@@ -45,7 +46,6 @@ namespace BookStore.Business.Services
 
         public async Task<bool> IsCategoryNameUniqueAsync(string name, int? categoryId = null)
         {
-
             if (categoryId.HasValue)
             {
                 return !await _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower() && c.Id != categoryId.Value);

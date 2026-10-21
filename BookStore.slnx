@@ -3,5 +3,5 @@
   <Project Path="BookStore.DataAccess/BookStore.DataAccess.csproj" />
   <Project Path="BookStore.Models/BookStore.Models.csproj" />
   <Project Path="BookStore.Utility/BookStore.Utility.csproj" />
-  <Project Path="BookStore/BookStore.csproj" />
+  <Project Path="BookStore/BookStoreWebApp.csproj" />
 </Solution>

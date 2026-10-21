@@ -1,3 +1,5 @@
+using BookStore.Business.Services;
+using BookStore.Business.Services.IServices;
 using BookStore.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings:SQLConnection").Value);
 });
 // Register the CategoryService with the dependency injection container.
+//builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 var app = builder.Build();
@@ -31,10 +34,16 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+// 
+app.MapControllerRoute(
+    name: "MyArea",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Home}/{action=Index}/{id?}",
+    defaults: new { area = "Customer" })
     .WithStaticAssets();
 
 

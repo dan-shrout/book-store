@@ -14,12 +14,12 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             <form method="post">
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label fw-semibold small">Category Name</label>
+                    <label asp-for="Name" class="form-label fw-semibold small"></label>
                     <input type="text" name="Name" asp-for="@Model.Name" class="form-control" placeholder="Enter category name" />
                     <span class="text-danger small" asp-validation-for="Name"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="DisplayOrder" class="form-label fw-semibold small">Display Order</label>
+                    <label asp-for="DisplayOrder" class="form-label fw-semibold small"></label>
                     <input type="number" name="DisplayOrder" asp-for="@Model.DisplayOrder" class="form-control" placeholder="Enter display order" />
                     <span class="text-danger small" asp-validation-for="DisplayOrder"></span>
                 </div>

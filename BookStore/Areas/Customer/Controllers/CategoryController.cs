@@ -2,8 +2,9 @@
 using BookStore.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BookStore.Controllers
+namespace BookStoreWebApp.Areas.Customer.Controllers
 {
+    [Area("Customer")]
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
