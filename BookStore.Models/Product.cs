@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookStore.Models
 {
@@ -29,7 +31,11 @@ namespace BookStore.Models
         [Range(1, 1000)]
         [DisplayName("Price for 100+")]
         public double Price100 { get; set; }
+        public int CategoryId { get; set; }
+        [ForeignKey("CategoryId")]
+        public Category Category { get; set; }
         [DisplayName("Product Image")]
+        [ValidateNever]
         public string? ImageUrl { get; set; } = string.Empty;
     }
 }
