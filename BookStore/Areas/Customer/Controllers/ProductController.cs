@@ -17,6 +17,7 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             var products = await _productService.GetAllProductsAsync();
             return View(products);
         }
+
         public async Task<IActionResult> Create()
         {
             return View();
@@ -27,10 +28,6 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
         [ActionName("Create")]
         public async Task<IActionResult> CreatePOST(Product product)
         {
-            if (!String.IsNullOrEmpty(product.Name) && !await _productService.IsProductNameUniqueAsync(product.Name))
-            {
-                ModelState.AddModelError("", "That product name already exists");
-            }
             if (ModelState.IsValid)
             {
                 await _productService.CreateProductAsync(product);
@@ -60,15 +57,10 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
         [ActionName("Update")]
         public async Task<IActionResult> UpdatePOST(Product product)
         {
-            if (!String.IsNullOrEmpty(product.Name) &&
-                !await _productService.IsProductNameUniqueAsync(product.Name, product.Id))
-            {
-                ModelState.AddModelError("", "Product \"{product.Name}\" already exists");
-            }
             if (ModelState.IsValid)
             {
                 await _productService.UpdateProductAsync(product);
-                TempData["success"] = $"Product \"{product.Name}\" was updated successfully";
+                TempData["success"] = $"Product \"{product}\" was updated successfully";
                 return RedirectToAction("Index");
             }
             return View();
@@ -99,5 +91,12 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             return RedirectToAction("Index");
 
         }
+        #region API Calls
+        public async Task<IActionResult> GetAll()
+        {
+            var products = await _productService.GetAllProductsAsync();
+            return Json(new { data = products });
+        }
+        #endregion
     }
 }

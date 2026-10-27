@@ -14,14 +14,9 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             <form method="post">
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label fw-semibold small"></label>
-                    <input type="text" name="Name" asp-for="@Model.Name" class="form-control" placeholder="Enter product name" />
-                    <span class="text-danger small" asp-validation-for="Name"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="DisplayOrder" class="form-label fw-semibold small"></label>
-                    <input type="number" name="DisplayOrder" asp-for="@Model.DisplayOrder" class="form-control" placeholder="Enter display order" />
-                    <span class="text-danger small" asp-validation-for="DisplayOrder"></span>
+                    <label asp-for="Title" class="form-label fw-semibold small"></label>
+                    <input type="text" name="Title" asp-for="@Model.Title" class="form-control" placeholder="Enter product name" />
+                    <span class="text-danger small" asp-validation-for="Title"></span>
                 </div>
                 <div class="d-flex gap-2 mt-4">
                     <button type="submit" class="btn btn-accent fw-semibold">Create Product</button>

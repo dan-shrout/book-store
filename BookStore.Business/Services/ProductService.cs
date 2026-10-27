@@ -43,17 +43,5 @@ namespace BookStore.Business.Services
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
         }
-
-        public async Task<bool> IsProductNameUniqueAsync(string name, int? productId = null)
-        {
-            if (productId.HasValue)
-            {
-                return !await _context.Products.AnyAsync(c => c.Name.ToLower() == name.ToLower() && c.Id != productId.Value);
-            }
-            else
-            {
-                return !await _context.Products.AnyAsync(c => c.Name.ToLower() == name.ToLower());
-            }
-        }
     }
 }

@@ -13,9 +13,9 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings:SQLConnection").Value);
 });
-// Register the CategoryService with the dependency injection container.
-//builder.Services.AddScoped<ICategoryService, CategoryService>();
+// Register the CategoryService and ProductService with the dependency injection container.
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
