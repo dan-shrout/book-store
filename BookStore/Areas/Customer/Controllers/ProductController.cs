@@ -1,6 +1,8 @@
 ﻿using BookStore.Business.Services.IServices;
 using BookStore.Models;
+using BookStore.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BookStoreWebApp.Areas.Customer.Controllers
 {
@@ -8,25 +10,36 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
-        public ProductController(IProductService productService)
+        private readonly ICategoryService _categoryService;
+        public ProductController(IProductService productService, ICategoryService categoryService)
         {
             _productService = productService;
+            _categoryService = categoryService;
         }
         public async Task<IActionResult> Index()
-        {
-            var products = await _productService.GetAllProductsAsync();
-            return View(products);
-        }
-
-        public async Task<IActionResult> Create()
         {
             return View();
         }
 
+        public async Task<IActionResult> Upsert()
+        {
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            ProductVM productVM = new()
+            {
+                CategoryList = categories.Select(c => new SelectListItem
+                {
+                    Text = c.Name,
+                    Value = c.Id.ToString()
+                }),
+                Product = new Product()
+            };
+            return View(productVM);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [ActionName("Create")]
-        public async Task<IActionResult> CreatePOST(Product product)
+        [ActionName("Upsert")]
+        public async Task<IActionResult> UpsertPOST(Product product)
         {
             if (ModelState.IsValid)
             {
@@ -37,34 +50,6 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Update(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-
-            var product = await _productService.GetProductByIdAsync(id.Value);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [ActionName("Update")]
-        public async Task<IActionResult> UpdatePOST(Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                await _productService.UpdateProductAsync(product);
-                TempData["success"] = $"Product \"{product}\" was updated successfully";
-                return RedirectToAction("Index");
-            }
-            return View();
-        }
         // Delete
         public async Task<IActionResult> Delete(int? id)
         {
@@ -94,7 +79,7 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
         #region API Calls
         public async Task<IActionResult> GetAll()
         {
-            var products = await _productService.GetAllProductsAsync();
+            var products = await _productService.GetAllProductsAsync(true);
             return Json(new { data = products });
         }
         #endregion

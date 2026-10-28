@@ -1,17 +1,27 @@
 ﻿$('#tblData').DataTable({
     ajax: '/product/getall',
     columns: [
-        { data: 'title' },
-        { data: "description" },
-        { data: "isbn" },
-        { data: "author" },
-        { data: "listPrice" },
-        { data: "price" },
-        { data: "price50" },
-        { data: "price100" },
-        { data: "categoryId" },
-        { data: "category" },
-        { data: "imageUrl" },
+        { data: 'title', "width": "20%" },
+        { data: "isbn", "width": "15%" },
+        { data: "price", "width": "10%", "render": function (data) { return '$' + data.toFixed(2);} },
+        { data: "author", "width": "15%" },
+        { 
+            data: "category.name", "width": "10%", "render": function (data) { return '<span class="badge bg-secondary">' + data + '</span>'} 
+        },
+        { 
+            data: "id", "width": "25%", "render": function (data) {
+                return `<div class="d-flex gap-2 justify-content-end">
+                            <a href="/product/edit?id=${data}" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-pencil-square"></i>
+                                Edit
+                            </a>
+                             <a href="/product/edit?id=${data}" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                                Delete
+                            </a>
+                        </div>`;
+            } 
+        },
     ]
 })
 
