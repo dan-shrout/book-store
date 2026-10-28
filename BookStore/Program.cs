@@ -19,6 +19,17 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
+// This is a temporary workaround to allow the use of the unload event in the browser,
+// which is blocked by default due to security reasons. The unload event is used to perform
+// cleanup tasks when a user navigates away from a page or closes a tab. By adding this header,
+// it's allowing the unload event to be used in this application.
+// https://learn.microsoft.com/en-ie/answers/questions/5975894/violation-permissions-policy-violation-unload-is-n
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("Permissions-Policy", "unload=*");
+    await next();
+});
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
