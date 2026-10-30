@@ -11,6 +11,7 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
     {
         private readonly IProductService _productService;
         // This is used to access the web host environment, which provides information about the web hosting environment an application is running in.
+        // This is how you access the wwwroot folder, which is the root folder for static files in an ASP.NET Core application.
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ICategoryService _categoryService;
         public ProductController(IProductService productService, ICategoryService categoryService, IWebHostEnvironment webHostEnvironment)
@@ -24,7 +25,7 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Upsert()
+        public async Task<IActionResult> Upsert(int? id)
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
             ProductVM productVM = new()
@@ -36,7 +37,18 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
                 }),
                 Product = new Product()
             };
-            return View(productVM);
+            if (id == null || id == 0)
+            {
+                // Create
+                return View(productVM);
+            }
+            else
+            {
+                // Update
+                productVM.Product = await _productService.GetProductByIdAsync(id.Value);
+
+                return View(productVM);
+            }
         }
 
         [HttpPost]
