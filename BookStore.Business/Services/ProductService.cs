@@ -25,10 +25,19 @@ namespace BookStore.Business.Services
 
         }
 
-        public async Task<Product?> GetProductByIdAsync(int id)
+        public async Task<Product?> GetProductByIdAsync(int id, bool includeCategory = false)
         {
-            return await _context.Products.FindAsync(id);
+            if (includeCategory)
+            {
+                // if there are two with the same ID, this will always return one product 
+                return await _context.Products.Include(u => u.Category).FirstOrDefaultAsync(u => u.Id == id);
+            }
+            else
+            {
+                return await _context.Products.FirstOrDefaultAsync(u => u.Id == id);
+            }
         }
+
         public async Task<Product> CreateProductAsync(Product product)
         {
             _context.Products.Add(product);
