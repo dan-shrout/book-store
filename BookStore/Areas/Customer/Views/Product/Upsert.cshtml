@@ -7,14 +7,16 @@
     </a>
     <div class="card border shadow-sm overflow-hidden">
         <div class="card-header text-white py-3 px-4" style="background: linear-gradient(to right, #065f46, #282828, #191414);">
-            <h5 class="mb-0 fw-bold"><i class="bi bi-plus-lg me-2"></i>Create Product</h5>
-            <p class="mb-0 small" style="color: #1DB954;">Add a new product for your products</p>
+            <h5 class="mb-0 fw-bold"><i class="bi bi-plus-lg me-2"></i>@(Model.Product.Id !=0 ? "Edit Product" : "Create Product")</h5>
+            <p class="mb-0 small" style="color: #1DB954;">@(Model.Product.Id != 0 ? "Edit product details" : "Add a new product")</p>
         </div>
         <div class="card-body p-4">
             <form method="post" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-lg-8">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="Product.Id" />
+                        <input type="hidden" asp-for="Product.ImageUrl" />
                         <div class="row-lg-3">
                             <div class="col-12">
                                 <label asp-for="Product.Title" class="form-label fw-semibold small"></label>
@@ -23,7 +25,8 @@
                             </div>
                             <div class="col-12">
                                 <label asp-for="Product.Description" class="form-label fw-semibold small"></label>
-                                <input type="text" asp-for="Product.Description" class="form-control" placeholder="Enter product description" />
+                                <textarea asp-for="Product.Description" hidden class="form-control" placeholder="Enter product description" ></textarea>
+                                <div id="quill-editor" style="height: 200px;"></div>
                                 <span class="text-danger small" asp-validation-for="Product.Description"></span>
                             </div>
                             <div class="col-6">
@@ -77,7 +80,10 @@
                                     <p class="text-secondary mt-1 mb-0" style="font-size: 0.75rem;">Upload Product Image (JPG, PNG)</p>
                                 </div>
                             </div>
-
+                            <div class="d-flex gap-2 mt-3">
+                                <button type="submit" class="btn btn-accent fw-semibold">@(Model.Product.Id != 0 ? "Edit" : "Create") Product</button>
+                                <a asp-controller="Product" asp-action="Index" class="btn btn-light fw-medium">Cancel</a>
+                            </div>
                         </div>
                     </div>
 
@@ -102,10 +108,7 @@
 
                     </div>
                 </div>
-                <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-accent fw-semibold">Create Product</button>
-                    <a asp-controller="Product" asp-action="Index" class="btn btn-light fw-medium">Cancel</a>
-                </div>
+          
             </form>
         </div>
     </div>
@@ -113,4 +116,18 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <!-- Quill -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <!-- Initialize Quill editor -->
+    <script>
+        const quill = new Quill('#quill-editor', {
+            theme: 'snow'
+        });
+        const textAreaDescription = document.querySelector('textarea[name="Product.Description"]');
+        // Load existing content and aut-sync
+        if (textAreaDescription.value) quill.root.innerHTML = textAreaDescription.value;
+
+        quill.on('text-change', () => textAreaDescription.value = quill.root.innerHTML);
+    </script>
 }

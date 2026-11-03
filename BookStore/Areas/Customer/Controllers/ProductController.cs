@@ -75,7 +75,15 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
                     }
                     productVM.Product.ImageUrl = Path.Combine(@"\", productPath, fileName).Replace("\\", "/");
                 }
-                await _productService.CreateProductAsync(productVM.Product);
+                if (productVM.Product.Id == null || productVM.Product.Id == 0)
+                {
+                    await _productService.CreateProductAsync(productVM.Product);
+                }
+                else
+                {
+                    await _productService.UpdateProductAsync(productVM.Product);
+                }
+
                 TempData["success"] = "Product was created successfully";
                 return RedirectToAction("Index");
             }
@@ -95,36 +103,41 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
         }
 
         // Delete
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
 
-            var product = await _productService.GetProductByIdAsync(id.Value);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [ActionName("Delete")]
-        public async Task<IActionResult> DeletePOST(int id)
-        {
-            await _productService.DeleteProductAsync(id);
-            TempData["success"] = "Product was deleted successfully";
-            return RedirectToAction("Index");
-
-        }
         #region API Calls
         public async Task<IActionResult> GetAll()
         {
             var products = await _productService.GetAllProductsAsync(true);
             return Json(new { data = products });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return Json(new { success = false, message = "Invalid ID" });
+            }
+            // Delete the image first
+            var productToBeDeleted = await _productService.GetProductByIdAsync(id.Value);
+
+            if (productToBeDeleted == null)
+            {
+                return Json(new { success = false, message = "Error while deleting" });
+            }
+
+            if (!string.IsNullOrEmpty(productToBeDeleted.ImageUrl))
+            {
+                var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, productToBeDeleted.ImageUrl.TrimStart('\\', '/'));
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
+            }
+            await _productService.DeleteProductAsync(id.Value);
+            //TempData["success"] = "Product was deleted successfully";
+            return Json(new { success = true, message = "Deleted Successfully" });
         }
         #endregion
     }
