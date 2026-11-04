@@ -1,8 +1,11 @@
 ﻿using BookStore.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+
 namespace BookStore.Data
 {
-    public class ApplicationDBContext : DbContext
+    public class ApplicationDBContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         {
@@ -11,6 +14,8 @@ namespace BookStore.Data
         public DbSet<Product> Products { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Call the base method to ensure that the Identity model is configured correctly.
+            base.OnModelCreating(modelBuilder);
             // Adding data seeding for the Category entity
             modelBuilder.Entity<Category>().HasData(
                     new Category { Id = 1, Name = "Action", DisplayOrder = 1 },
