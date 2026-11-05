@@ -1,6 +1,7 @@
 using BookStore.Business.Services;
 using BookStore.Business.Services.IServices;
 using BookStore.Data;
+using BookStore.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings:SQLConnection").Value);
 });
 // This line adds the Identity services to the application, which allows for user authentication and authorization.
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>();
 // Register the CategoryService and ProductService with the dependency injection container.
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
