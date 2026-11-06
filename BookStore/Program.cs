@@ -16,7 +16,16 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings:SQLConnection").Value);
 });
 // This line adds the Identity services to the application, which allows for user authentication and authorization.
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDBContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{ // Adding custom validations for the password
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 5;
+    options.Password.RequiredUniqueChars = 1;
+
+}).AddEntityFrameworkStores<ApplicationDBContext>();
 // Register the CategoryService and ProductService with the dependency injection container.
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
