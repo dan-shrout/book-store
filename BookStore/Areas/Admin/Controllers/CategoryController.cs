@@ -1,10 +1,13 @@
 ﻿using BookStore.Business.Services.IServices;
 using BookStore.Models;
+using BookStore.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStoreWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.RoleAdmin)]
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
@@ -12,6 +15,7 @@ namespace BookStoreWebApp.Areas.Admin.Controllers
         {
             _categoryService = categoryService;
         }
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var categories = await _categoryService.GetAllCategoriesAsync();

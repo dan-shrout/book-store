@@ -1,12 +1,15 @@
 ﻿using BookStore.Business.Services.IServices;
 using BookStore.Models;
 using BookStore.Models.ViewModels;
+using BookStore.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BookStoreWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.RoleAdmin)]
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
@@ -20,6 +23,7 @@ namespace BookStoreWebApp.Areas.Admin.Controllers
             _categoryService = categoryService;
             _webHostEnvironment = webHostEnvironment;
         }
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             return View();
@@ -106,6 +110,7 @@ namespace BookStoreWebApp.Areas.Admin.Controllers
 
 
         #region API Calls
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var products = await _productService.GetAllProductsAsync(true);

@@ -30,6 +30,16 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+// This configures the application cookie, which is used for authentication. It sets the login path,
+// logout path, access denied path, and expiration time for the cookie.
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = $"/identity/Account/Login";
+    options.LogoutPath = $"/identity/Account/Logout";
+    options.AccessDeniedPath = $"/identity/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+});
+
 var app = builder.Build();
 
 // This is a temporary workaround to allow the use of the unload event in the browser,
