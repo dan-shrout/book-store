@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace BookStore.Models
 {
@@ -11,7 +8,8 @@ namespace BookStore.Models
     {
         public int Id
         {
-            get: set; }
+            get; set;
+        }
 
         public int ProductId { get; set; }
 

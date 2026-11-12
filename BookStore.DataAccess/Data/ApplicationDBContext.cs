@@ -13,6 +13,9 @@ namespace BookStore.Data
         public DbSet<Product> Products { get; set; }
         // Add a DbSet for the ApplicationUser entity, it won't create a table but add columns to the AspNetUsers table.
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+        public DbSet<OrderHeader> OrderHeaders { get; set; }
+        public DbSet<OrderDetails> OrderDetails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Call the base method to ensure that the Identity model is configured correctly.
