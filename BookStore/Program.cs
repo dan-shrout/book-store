@@ -29,6 +29,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 // Register the CategoryService and ProductService with the dependency injection container.
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
 // This configures the application cookie, which is used for authentication. It sets the login path,
 // logout path, access denied path, and expiration time for the cookie.

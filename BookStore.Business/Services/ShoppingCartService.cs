@@ -1,5 +1,7 @@
 ﻿using BookStore.Business.Services.IServices;
+using BookStore.Data;
 using BookStore.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookStore.Business.Services
 {
@@ -12,9 +14,9 @@ namespace BookStore.Business.Services
         }
 
 
-        async Task ClearCartAsync(string userId)
+        public async Task ClearCartAsync(string userId)
         {
-            var cartItems = _context.ShoppingCarts.Include(c => c.Product).Where(c => c.ApplicationUserId == userId).ToListAsync();
+            var cartItems = await _context.ShoppingCarts.Include(c => c.Product).Where(c => c.ApplicationUserId == userId).ToListAsync();
 
             if (cartItems.Any())
             {
@@ -23,7 +25,7 @@ namespace BookStore.Business.Services
             }
         }
 
-        public async Task<ShoppingCart> GetCartByIdAsync(int cartId)
+        public async Task<ShoppingCart?> GetCartByIdAsync(int cartId)
         {
             return await _context.ShoppingCarts.Include(c => c.Product).FirstOrDefaultAsync(c => c.Id == cartId);
         }
@@ -33,7 +35,7 @@ namespace BookStore.Business.Services
             return await _context.ShoppingCarts.Where(c => c.ApplicationUserId == userId).SumAsync(c => c.Count);
         }
 
-        public async Task<IEnumerable<ShoppingCart>> GetShoppingCartItemsAsync(string userId)
+        public async Task<IEnumerable<ShoppingCart>> GetUserShoppingCartItemsAsync(string userId)
         {
             return await _context.ShoppingCarts.Include(c => c.Product).Where(u => u.ApplicationUserId == userId).ToListAsync();
         }

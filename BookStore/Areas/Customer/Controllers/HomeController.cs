@@ -1,6 +1,8 @@
 using BookStore.Business.Services.IServices;
 using BookStore.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BookStoreWebApp.Areas.Customer.Controllers
 {
@@ -8,9 +10,11 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
     public class HomeController : Controller
     {
         private readonly IProductService _productService;
-        public HomeController(IProductService productService)
+        private readonly IShoppingCartService _shoppingCartService;
+        public HomeController(IProductService productService, IShoppingCartService shoppingCartService)
         {
             _productService = productService;
+            _shoppingCartService = shoppingCartService;
         }
 
         public async Task<IActionResult> Index()
@@ -32,12 +36,25 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
                 Product = product,
                 Count = 1
             };
-            return View(product);
+            return View(cart);
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Details(ShoppingCart shoppingCart)
         {
-            return View();
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            shoppingCart.ApplicationUserId = userId;
+            await _shoppingCartService.AddToCartAsync(shoppingCart);
+
+            return RedirectToAction("Details", new { productId = shoppingCart.ProductId });
         }
 
     }
