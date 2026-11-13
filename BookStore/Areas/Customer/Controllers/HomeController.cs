@@ -1,4 +1,5 @@
 using BookStore.Business.Services.IServices;
+using BookStore.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStoreWebApp.Areas.Customer.Controllers
@@ -21,6 +22,16 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
         public async Task<IActionResult> Details(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId, includeCategory: true);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            ShoppingCart cart = new ShoppingCart()
+            {
+                ProductId = productId,
+                Product = product,
+                Count = 1
+            };
             return View(product);
         }
 

@@ -40,12 +40,34 @@ namespace BookStore.Business.Services
 
         public async Task<ShoppingCart> AddToCartAsync(ShoppingCart cart)
         {
-            throw new NotImplementedException();
+            var existingCart = await _context.ShoppingCarts.Include(c => c.Product)
+                .FirstOrDefaultAsync(c => c.ApplicationUserId == cart.ApplicationUserId && c.ProductId == cart.ProductId);
+            if (existingCart != null)
+            {
+                existingCart.Count += cart.Count;
+                await _context.SaveChangesAsync();
+                return existingCart;
+            }
+            else
+            {
+                _context.ShoppingCarts.Add(cart);
+                await _context.SaveChangesAsync();
+                return cart;
+            }
+
         }
 
         public async Task UpdateCartAsync(ShoppingCart cart)
         {
-            throw new NotImplementedException();
+            if (cart.Count <= 0)
+            {
+                _context.ShoppingCarts.Remove(cart);
+            }
+            else
+            {
+                _context.ShoppingCarts.Update(cart);
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }
