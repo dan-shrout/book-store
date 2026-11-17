@@ -43,6 +43,8 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
         [Authorize]
         public async Task<IActionResult> Details(ShoppingCart shoppingCart)
         {
+            // This method is called when the user submits the form to add a product to the shopping cart.
+            // It retrieves the user's ID from the claims and associates it with the shopping cart item before adding it to the cart.
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
