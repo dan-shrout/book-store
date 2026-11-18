@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BookStore.DataAccess.Migrations
 {
-    [DbContext(typeof(ApplicationDBContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20261112045954_AddShoppingCartOrderHeaderAndDetails")]
     partial class AddShoppingCartOrderHeaderAndDetails
     {

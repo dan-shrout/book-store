@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookStore.Data
 {
-    public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
         public DbSet<Category> Categories { get; set; }

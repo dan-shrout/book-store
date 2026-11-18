@@ -1,5 +1,7 @@
 using BookStore.Business.Services.IServices;
+using BookStore.Models;
 using BookStore.Models.ViewModels;
+using BookStore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -10,12 +12,14 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
     [Authorize]
     public class CartController : Controller
     {
-        private readonly IProductService _productService;
+        private readonly IOrderService _orderService;
         private readonly IShoppingCartService _shoppingCartService;
-        public CartController(IProductService productService, IShoppingCartService shoppingCartService)
+        private readonly IApplicationUserService _applicationUserService;
+        public CartController(IOrderService orderService, IShoppingCartService shoppingCartService, IApplicationUserService applicationUserService)
         {
-            _productService = productService;
+            _orderService = orderService;
             _shoppingCartService = shoppingCartService;
+            _applicationUserService = applicationUserService;
         }
 
         public async Task<IActionResult> Index()
@@ -29,6 +33,7 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             }
             // if everything is valid, get the shopping cart items for the user and pass them to the view
             var cartItems = await _shoppingCartService.GetUserShoppingCartItemsAsync(userId);
+            var user = await _applicationUserService.GetUserByIdAsync(userId);
 
             // Create a new instance of the ShoppingCartVM class and populate it with the shopping cart items and a new OrderHeader object
             ShoppingCartVM shoppingCartVM = new ShoppingCartVM()
@@ -36,6 +41,15 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
                 ShoppingCartList = cartItems,
                 OrderHeader = new()
             };
+            // Populate the OrderHeader object with the user's information
+            shoppingCartVM.OrderHeader.ApplicationUser = user;
+            shoppingCartVM.OrderHeader.ApplicationUserId = userId;
+            shoppingCartVM.OrderHeader.Name = user.Name;
+            shoppingCartVM.OrderHeader.PhoneNumber = user.PhoneNumber;
+            shoppingCartVM.OrderHeader.StreetAddress = user.StreetAddress;
+            shoppingCartVM.OrderHeader.City = user.City;
+            shoppingCartVM.OrderHeader.State = user.State;
+            shoppingCartVM.OrderHeader.PostalCode = user.PostalCode;
 
             // Calculate the total order amount by iterating through the shopping cart items and summing up the total price for each item (price * count)
             foreach (var cart in shoppingCartVM.ShoppingCartList)
@@ -43,6 +57,117 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
                 shoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
             }
             return View(shoppingCartVM);
+        }
+        [HttpPost]
+        [ActionName("Index")]
+        public async Task<IActionResult> IndexPost(ShoppingCartVM shoppingCartVM)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            // if everything is valid, get the shopping cart items for the user and pass them to the view
+            var cartItems = await _shoppingCartService.GetUserShoppingCartItemsAsync(userId);
+
+            // Create a new instance of the ShoppingCartVM class and populate it with the shopping cart items and a new OrderHeader object
+            // Populate the OrderHeader object with the user's information
+            shoppingCartVM.ShoppingCartList = cartItems;
+            shoppingCartVM.OrderHeader.OrderDate = DateTime.UtcNow;
+            shoppingCartVM.OrderHeader.ApplicationUserId = userId;
+
+            // Calculate the total order amount by iterating through the shopping cart items and summing up the total price for each item (price * count)
+            foreach (var cart in shoppingCartVM.ShoppingCartList)
+            {
+                shoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+            }
+
+            shoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
+            shoppingCartVM.OrderHeader.OrderDetails = shoppingCartVM.ShoppingCartList.Select(cart => new OrderDetails
+            {
+                ProductId = cart.ProductId,
+                Count = cart.Count,
+                Price = cart.Price
+            }).ToList();
+            // Create order
+            await _orderService.CreateOrderAsync(shoppingCartVM.OrderHeader);
+            return RedirectToAction("OrderConfirmation", new { orderId = shoppingCartVM.OrderHeader.Id });
+        }
+        // Action method to increase the quantity of a specific item in the shopping cart
+        public async Task<IActionResult> OrderConfirmation(int id)
+        {
+            return View(id);
+        }
+        public async Task<IActionResult> Plus(int cartId)
+        {
+            var cart = await _shoppingCartService.GetCartByIdAsync(cartId);
+            if (cart != null)
+            {
+                if (cart.Count == 1000)
+                {
+                    // Do nothing
+                }
+                else
+                {
+                    cart.Count++;
+                    await _shoppingCartService.UpdateCartAsync(cart);
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        // Action method to decrease the quantity of a specific item in the shopping cart
+        public async Task<IActionResult> Minus(int cartId)
+        {
+            var cart = await _shoppingCartService.GetCartByIdAsync(cartId);
+            if (cart != null)
+            {
+                cart.Count--;
+                await _shoppingCartService.UpdateCartAsync(cart);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        // Action method to remove a specific item from the shopping cart
+        public async Task<IActionResult> Remove(int cartId)
+        {
+            var cart = await _shoppingCartService.GetCartByIdAsync(cartId);
+            if (cart != null)
+            {
+                cart.Count = 0;
+                await _shoppingCartService.UpdateCartAsync(cart);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        public async Task<IActionResult> UpdateCart(int cartId, int count)
+        {
+            var cart = await _shoppingCartService.GetCartByIdAsync(cartId);
+            if (cart == null)
+            {
+                return NotFound();
+            }
+
+            if (count <= 1)
+            {
+                cart.Count = 0;
+            }
+            else
+            {
+                if (count >= 1000)
+                {
+                    cart.Count = 1000;
+                }
+                else
+                {
+                    cart.Count = count;
+                }
+            }
+            await _shoppingCartService.UpdateCartAsync(cart);
+            // Return a JSON response indicating success
+            return Ok(new { success = true });
         }
     }
 }

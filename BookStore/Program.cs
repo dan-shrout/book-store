@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 // This is the connection string for the database, which is stored in the appsettings.json file.
 // The connection string is used to connect to the database.
-builder.Services.AddDbContext<ApplicationDBContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings:SQLConnection").Value);
 });
@@ -25,11 +25,13 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequiredLength = 5;
     options.Password.RequiredUniqueChars = 1;
 
-}).AddEntityFrameworkStores<ApplicationDBContext>();
+}).AddEntityFrameworkStores<ApplicationDbContext>();
 // Register the CategoryService and ProductService with the dependency injection container.
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // This configures the application cookie, which is used for authentication. It sets the login path,
 // logout path, access denied path, and expiration time for the cookie.

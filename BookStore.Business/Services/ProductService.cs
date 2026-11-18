@@ -7,8 +7,8 @@ namespace BookStore.Business.Services
 {
     public class ProductService : IProductService
     {
-        private readonly ApplicationDBContext _context;
-        public ProductService(ApplicationDBContext context)
+        private readonly ApplicationDbContext _context;
+        public ProductService(ApplicationDbContext context)
         {
             _context = context;
         }
