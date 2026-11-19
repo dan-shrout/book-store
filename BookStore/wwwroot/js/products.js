@@ -1,35 +1,36 @@
-﻿var productDataTable;
-// When the document is ready, initialize the DataTable for the products table
+﻿﻿var productDataTable;
+
 $(document).ready(function () {
-    productDataTable();
+    loadDataTable();
 })
 
-productDataTable = $('#tblData').DataTable({
-    ajax: '/admin/product/getall',
-    columns: [
-        { data: 'title', "width": "20%" },
-        { data: "isbn", "width": "15%" },
-        { data: "price", "width": "10%", "render": function (data) { return '$' + data.toFixed(2); } },
-        { data: "author", "width": "15%" },
-        {
-            data: "category.name", "width": "10%", "render": function (data) { return '<span class="badge bg-secondary">' + data + '</span>' }
-        },
-        {
-            data: "id", "width": "25%", "render": function (data) {
-                return `<div class="d-flex gap-2 justify-content-end">
+function loadDataTable() {
+    productDataTable = $('#tblData').DataTable({
+        ajax: '/admin/product/getall',
+        columns: [
+            { data: 'title', "width": "25%" },
+            { data: 'isbn', "width": "15%" },
+            { data: 'price', "width": "10%", "render": function (data) { return '$' + data.toFixed(2); } },
+            { data: 'author', "width": "15%" },
+            {
+                data: 'category.name', "width": "10%", "render": function (data) { return '<span class="badge bg-secondary">' + data + '</span>'; }
+            },
+            {
+                data: 'id', "width": "25%", "render": function (data) {
+                    return `<div class="d-flex gap-2 justify-content-end">
                             <a href="/admin/product/upsert?id=${data}" class="btn btn-sm btn-outline-success">
-                                <i class="bi bi-pencil-square"></i>
-                                Edit
+                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
-                             <a onclick="Delete('/admin/product/delete/${data}')" class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash"></i>
-                                Delete This
+                              <a onclick="Delete('/admin/product/delete/${data}')" class="btn btn-sm btn-outline-danger">
+                                 <i class="bi bi-trash"></i> Delete
                             </a>
-                        </div>`;
+                        </div > `;
+                }
             }
-        },
-    ]
-});
+        ]
+    });
+}
+
 
 function Delete(url) {
     Swal.fire({
@@ -42,20 +43,19 @@ function Delete(url) {
         confirmButtonText: "Yes, delete it!"
     }).then((result) => {
         if (result.isConfirmed) {
+
             $.ajax({
                 url: url,
                 type: 'DELETE',
                 success: function (data) {
-                    // This will reload the DataTable to reflect the changes after deletion
                     productDataTable.ajax.reload();
                     Swal.fire({
                         title: "Deleted!",
                         text: "Your file has been deleted.",
                         icon: "success"
                     });
-                } 
+                }
             })
         }
     });
 }
-

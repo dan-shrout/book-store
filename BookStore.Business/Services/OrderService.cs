@@ -187,30 +187,31 @@ namespace BookStore.Business.Services
             await _db.SaveChangesAsync();
         }
 
-        //public async Task UpdateOrderStatusAsync(int id, string orderStatus, string? carrier = null, string? trackingNumber = null)
-        //{
-        //    var order = await _db.OrderHeaders.FindAsync(id);
-        //    if (order == null)
-        //    {
-        //        throw new KeyNotFoundException($"Order {id} not found");
-        //    }
-        //    order.OrderStatus = orderStatus;
+        public async Task UpdateOrderStatusAsync(int id, string orderStatus, string? carrier = null, string? trackingNumber = null)
+        {
+            // first get the order from the database
+            var order = await _db.OrderHeaders.FindAsync(id);
+            if (order == null)
+            {
+                throw new KeyNotFoundException($"Order {id} not found");
+            }
+            order.OrderStatus = orderStatus;
 
-        //    if (orderStatus == SD.StatusShipped)
-        //    {
-        //        order.ShippingDate = DateTime.UtcNow;
-        //        if (!string.IsNullOrEmpty(carrier))
-        //        {
-        //            order.Carrier = carrier;
-        //        }
-        //        if (!string.IsNullOrEmpty(trackingNumber))
-        //        {
-        //            order.TrackingNumber = trackingNumber;
-        //        }
-        //    }
+            if (orderStatus == SD.StatusShipped)
+            {
+                order.ShippingDate = DateTime.UtcNow;
+                if (!string.IsNullOrEmpty(carrier))
+                {
+                    order.Carrier = carrier;
+                }
+                if (!string.IsNullOrEmpty(trackingNumber))
+                {
+                    order.TrackingNumber = trackingNumber;
+                }
+            }
 
-        //    await _db.SaveChangesAsync();
-        //}
+            await _db.SaveChangesAsync();
+        }
 
         public async Task UpdateStripePaymentAsync(int orderId, string sessionId, string paymentIntentId)
         {
