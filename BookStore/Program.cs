@@ -33,6 +33,14 @@ builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+builder.Services.AddDistributedMemoryCache(); // Adds a default in-memory implementation of IDistributedCache
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Sets the session timeout to 30 minutes
+    options.Cookie.HttpOnly = true; // Ensures the cookie is only accessible via HTTP requests
+    options.Cookie.IsEssential = true; // Marks the cookie as essential for the application to function correctly
+});
+
 // This configures the application cookie, which is used for authentication. It sets the login path,
 // logout path, access denied path, and expiration time for the cookie.
 builder.Services.ConfigureApplicationCookie(options =>
@@ -67,6 +75,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+// UseSession must be called before UseAuthentication and UseAuthorization, as it relies on session state to manage user authentication and authorization.
+app.UseSession();
 // This goes first before authorization because the user needs to be authenticated before they can be authorized to access certain resources.
 app.UseAuthentication();
 app.UseAuthorization();

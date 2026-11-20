@@ -12,5 +12,6 @@
         public const string StatusShipped = "Shipped";
         public const string StatusCancelled = "Cancelled";
         public const string StatusRefunded = "Refunded";
+        public const string SessionCart = "SessionShoppingCart";
     }
 }

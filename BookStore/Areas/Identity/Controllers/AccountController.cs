@@ -1,4 +1,5 @@
-﻿using BookStore.Models;
+﻿using BookStore.Business.Services.IServices;
+using BookStore.Models;
 using BookStore.Models.ViewModels;
 using BookStore.Utility;
 using Microsoft.AspNetCore.Identity;
@@ -17,11 +18,16 @@ namespace BookStoreWebApp.Areas.Identity.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
+        private readonly IShoppingCartService _shoppingCartService;
+        public AccountController(UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
+            IShoppingCartService shoppingCartService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _shoppingCartService = shoppingCartService;
         }
         public IActionResult Login(string? returnUrl = null)
         {
@@ -41,10 +47,14 @@ namespace BookStoreWebApp.Areas.Identity.Controllers
 
                 if (result.Succeeded)
                 {
-                    // Rdirect to the returnUrl if it's provided and is a local URL, otherwise redirect to the home page.
+                    // Redirect to the returnUrl if it's provided and is a local URL, otherwise redirect to the home page.
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
                         return Redirect(returnUrl);
+                    }
+                    if (User.IsInRole(SD.RoleAdmin) || User.IsInRole(SD.RoleEmployee))
+                    {
+                        return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
                     }
                     return RedirectToAction("Index", "Home", new { area = "Customer" });
                 }
@@ -109,7 +119,7 @@ namespace BookStoreWebApp.Areas.Identity.Controllers
                     }
                     // sign in the user
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    // Rdirect to the returnUrl if it's provided and is a local URL, otherwise redirect to the home page.
+                    // Redirect to the returnUrl if it's provided and is a local URL, otherwise redirect to the home page.
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
                         return Redirect(returnUrl);
@@ -132,6 +142,8 @@ namespace BookStoreWebApp.Areas.Identity.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            // Reset the shopping cart count in session to 0 on logout
+            HttpContext.Session.SetInt32(SD.SessionCart, 0);
             return RedirectToAction("Index", "Home", new { area = "Customer" });
         }
     }

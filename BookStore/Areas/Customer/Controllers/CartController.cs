@@ -113,6 +113,8 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
                 {
                     cart.Count++;
                     await _shoppingCartService.UpdateCartAsync(cart);
+                    await UpdateCartSessionAsync();
+
                 }
             }
 
@@ -126,6 +128,7 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             {
                 cart.Count--;
                 await _shoppingCartService.UpdateCartAsync(cart);
+                await UpdateCartSessionAsync();
             }
 
             return RedirectToAction(nameof(Index));
@@ -138,6 +141,7 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             {
                 cart.Count = 0;
                 await _shoppingCartService.UpdateCartAsync(cart);
+                await UpdateCartSessionAsync();
             }
 
             return RedirectToAction(nameof(Index));
@@ -166,8 +170,22 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
                 }
             }
             await _shoppingCartService.UpdateCartAsync(cart);
+            await UpdateCartSessionAsync(); // Update the session with the new cart count
             // Return a JSON response indicating success
             return Ok(new { success = true });
+        }
+        // Helper method
+        private async Task UpdateCartSessionAsync()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var count = await _shoppingCartService.GetCartCountAsync(userId);
+                HttpContext.Session.SetInt32(SD.SessionCart, count); // Update the session with the new cart count
+            }
+
         }
     }
 }
