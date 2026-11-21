@@ -4,6 +4,7 @@ using BookStore.Models.ViewModels;
 using BookStore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using System.Security.Claims;
 
 namespace BookStoreWebApp.Areas.Customer.Controllers
@@ -58,43 +59,61 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             }
             return View(shoppingCartVM);
         }
+
+        // This method handles Stripe payments
         [HttpPost]
         [ActionName("Index")]
-        public async Task<IActionResult> IndexPost(ShoppingCartVM shoppingCartVM)
+        public async Task<IActionResult> IndexPOST(ShoppingCartVM shoppingCartVM)
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
             }
-            // if everything is valid, get the shopping cart items for the user and pass them to the view
-            var cartItems = await _shoppingCartService.GetUserShoppingCartItemsAsync(userId);
 
-            // Create a new instance of the ShoppingCartVM class and populate it with the shopping cart items and a new OrderHeader object
-            // Populate the OrderHeader object with the user's information
+            var cartItems = await _shoppingCartService.GetUserCartItemsAsync(userId);
             shoppingCartVM.ShoppingCartList = cartItems;
             shoppingCartVM.OrderHeader.OrderDate = DateTime.UtcNow;
             shoppingCartVM.OrderHeader.ApplicationUserId = userId;
 
-            // Calculate the total order amount by iterating through the shopping cart items and summing up the total price for each item (price * count)
             foreach (var cart in shoppingCartVM.ShoppingCartList)
             {
                 shoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
             }
 
-            shoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
+
+            shoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
             shoppingCartVM.OrderHeader.OrderDetails = shoppingCartVM.ShoppingCartList.Select(cart => new OrderDetails
             {
                 ProductId = cart.ProductId,
+                Price = cart.Price,
                 Count = cart.Count,
-                Price = cart.Price
             }).ToList();
-            // Create order
+            //create order 
+
             await _orderService.CreateOrderAsync(shoppingCartVM.OrderHeader);
-            return RedirectToAction("OrderConfirmation", new { orderId = shoppingCartVM.OrderHeader.Id });
+
+            try
+            {
+                var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+
+                var sessionUrl = await _orderService.CreateStripeCheckoutSessionAsync(shoppingCartVM.OrderHeader, shoppingCartVM.ShoppingCartList, domain);
+
+                await _shoppingCartService.ClearCartAsync(userId);
+                HttpContext.Session.SetInt32(SD.SessionCart, 0);
+                Response.Headers.Append("Location", sessionUrl);
+                return new StatusCodeResult(303);
+
+            }
+            catch (StripeException ex)
+            {
+                TempData["error"] = "Payment processing failed. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
+
         }
+
         // Action method to increase the quantity of a specific item in the shopping cart
         public async Task<IActionResult> OrderConfirmation(int id)
         {
