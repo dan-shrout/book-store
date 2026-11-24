@@ -17,10 +17,10 @@ namespace BookStore.Business.Services
         public EmailService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _apiKey = _configuration["Mailjet:ApiKey"];
-            _secretKey = _configuration["Mailjet:SecretKey"];
-            _senderEmail = _configuration["Mailjet:SenderEmail"];
-            _senderName = _configuration["Mailjet:SenderName"];
+            _apiKey = _configuration["ExternalServices:MailJetAPIKey"];
+            _secretKey = _configuration["ExternalServices:MailJetSecretKey"];
+            _senderEmail = _configuration["ExternalServices:SenderEmail"];
+            _senderName = _configuration["ExternalServices:SenderName"];
         }
 
 
@@ -34,21 +34,21 @@ namespace BookStore.Business.Services
                     .WithTo(new SendContact(toEmail)).WithSubject(subject).WithHtmlPart(htmlContent).Build();
 
 
-                //var response = await client.SendTransactionalEmailAsync(email);
+                var response = await client.SendTransactionalEmailAsync(email);
 
-                //if (response.Messages != null && response.Messages.Length > 0)
-                //{
-                //    var message = response.Messages[0];
-                //    if (message.Status == "success")
-                //    {
-                //        return true;
-                //    }
-                //    else
-                //    {
-                //        return false;
-                //    }
+                if (response.Messages != null && response.Messages.Length > 0)
+                {
+                    var message = response.Messages[0];
+                    if (message.Status == "success")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
 
-                //}
+                }
 
                 return true;
 

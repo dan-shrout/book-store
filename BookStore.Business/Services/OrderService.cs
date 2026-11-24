@@ -232,20 +232,20 @@ namespace BookStore.Business.Services
             await _db.SaveChangesAsync();
         }
 
-        public async Task<bool> VerifyStripePaymentAsync(OrderHeader orderHeader)
-        {
-            var service = new SessionService();
-            Session session = service.Get(orderHeader.SessionId);
-            if (session.PaymentStatus.ToLower() == "paid")
-            {
-                await UpdateStripePaymentAsync(orderHeader.Id, session.Id, session.PaymentIntentId);
-                await UpdateOrderStatusAsync(orderHeader.Id, SD.StatusApproved);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        //public async Task<bool> VerifyStripePaymentAsync(OrderHeader orderHeader)
+        //{
+        //    var service = new SessionService();
+        //    Session session = service.Get(orderHeader.SessionId);
+        //    if (session.PaymentStatus.ToLower() == "paid")
+        //    {
+        //        await UpdateStripePaymentAsync(orderHeader.Id, session.Id, session.PaymentIntentId);
+        //        await UpdateOrderStatusAsync(orderHeader.Id, SD.StatusApproved);
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
     }
 }

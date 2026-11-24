@@ -4,7 +4,6 @@ using BookStore.Models.ViewModels;
 using BookStore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Stripe;
 using System.Security.Claims;
 
 namespace BookStoreWebApp.Areas.Customer.Controllers
@@ -16,7 +15,12 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
         private readonly IOrderService _orderService;
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IApplicationUserService _applicationUserService;
-        public CartController(IOrderService orderService, IShoppingCartService shoppingCartService, IApplicationUserService applicationUserService)
+        // MailJet
+        private readonly IEmailService _emailService;
+        public CartController(IOrderService orderService,
+            IShoppingCartService shoppingCartService,
+            IApplicationUserService applicationUserService,
+            IEmailService emailService)
         {
             _orderService = orderService;
             _shoppingCartService = shoppingCartService;
@@ -72,7 +76,7 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
                 return Unauthorized();
             }
 
-            var cartItems = await _shoppingCartService.GetUserCartItemsAsync(userId);
+            var cartItems = await _shoppingCartService.GetUserShoppingCartItemsAsync(userId);
             shoppingCartVM.ShoppingCartList = cartItems;
             shoppingCartVM.OrderHeader.OrderDate = DateTime.UtcNow;
             shoppingCartVM.OrderHeader.ApplicationUserId = userId;
@@ -93,24 +97,28 @@ namespace BookStoreWebApp.Areas.Customer.Controllers
             //create order 
 
             await _orderService.CreateOrderAsync(shoppingCartVM.OrderHeader);
+            var user = await _applicationUserService.GetUserByIdAsync(userId);
+            await _emailService.SendOrderConfirmationEmailAsync(user.Email,
+                shoppingCartVM.OrderHeader.Id, (decimal)shoppingCartVM.OrderHeader.OrderTotal);
+            return RedirectToAction("OrderConfirmation", new { id = shoppingCartVM.OrderHeader.Id });
 
-            try
-            {
-                var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+            //try
+            //{
+            //    var domain = Request.Scheme + "://" + Request.Host.Value + "/";
 
-                var sessionUrl = await _orderService.CreateStripeCheckoutSessionAsync(shoppingCartVM.OrderHeader, shoppingCartVM.ShoppingCartList, domain);
+            //    //var sessionUrl = await _orderService.CreateStripeCheckoutSessionAsync(shoppingCartVM.OrderHeader, shoppingCartVM.ShoppingCartList, domain);
 
-                await _shoppingCartService.ClearCartAsync(userId);
-                HttpContext.Session.SetInt32(SD.SessionCart, 0);
-                Response.Headers.Append("Location", sessionUrl);
-                return new StatusCodeResult(303);
+            //    await _shoppingCartService.ClearCartAsync(userId);
+            //    HttpContext.Session.SetInt32(SD.SessionCart, 0);
+            //    // Response.Headers.Append("Location", sessionUrl);
+            //    return new StatusCodeResult(303);
 
-            }
-            catch (StripeException ex)
-            {
-                TempData["error"] = "Payment processing failed. Please try again.";
-                return RedirectToAction(nameof(Index));
-            }
+            //}
+            //catch (StripeException ex)
+            //{
+            //    TempData["error"] = "Payment processing failed. Please try again.";
+            //    return RedirectToAction(nameof(Index));
+            //}
 
         }
 
