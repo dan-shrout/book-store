@@ -60,11 +60,11 @@ var app = builder.Build();
 // cleanup tasks when a user navigates away from a page or closes a tab. By adding this header,
 // it's allowing the unload event to be used in this application.
 // https://learn.microsoft.com/en-ie/answers/questions/5975894/violation-permissions-policy-violation-unload-is-n
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("Permissions-Policy", "unload=*");
-    await next();
-});
+//app.Use(async (context, next) =>
+//{
+//    context.Response.Headers.Append("Permissions-Policy", "unload=*");
+//    await next();
+//});
 
 
 // Configure the HTTP request pipeline.
